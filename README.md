@@ -1,2 +1,26 @@
 # actions-vibe
 Actions manager implemented in Vibe Coding
+
+## Structure
+
+- `public/` : racine web (point d'entrée `index.php`)
+- `src/` : code applicatif (espace de noms `App\`, autoloader sans Composer)
+- `migrations/` : scripts SQL
+- `bin/` : scripts en ligne de commande (`php bin/check-db.php` teste la connexion)
+- `tests/` : tests
+
+## Configuration
+
+Copier `.env.example` en `.env` (ou définir les variables d'environnement) : `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`.
+
+## Lancement local avec Docker
+
+```
+docker compose up --build
+```
+
+- Application : http://localhost:8080
+- PostgreSQL : `localhost:5432` (base, utilisateur et mot de passe : `actions`)
+- Test de connexion : `docker compose exec app php bin/check-db.php`
+- Les scripts `.sql` de `migrations/` sont joués à la première création de la base ; pour les rejouer : `docker compose down -v`.
+- Port déjà utilisé ? Changer les ports publiés : `APP_PORT=8081 DB_HOST_PORT=5433 docker compose up --build`.

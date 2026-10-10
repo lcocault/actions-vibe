@@ -2,11 +2,11 @@
 
 États possibles : `À faire`, `En cours`, `Terminé`, `Bloqué`.
 
-Aucune fonctionnalité n'est encore implémentée : le dépôt ne contient pour l'instant que la documentation de suivi.
+Seul le squelette (fonctionnalité 1) est en place ; le reste reste à développer.
 
 | # | Fonctionnalité | État |
 |---|----------------|------|
-| 1 | Squelette PHP (structure, configuration, connexion PDO PostgreSQL) | À faire |
+| 1 | Squelette PHP (structure, configuration, connexion PDO PostgreSQL) | Terminé |
 | 2 | Schéma SQL : tables `task` et `task_dependency` (migration) | À faire |
 | 3 | Modèle de tâche et validation (titre, catégorie `Pro`/`Perso`, date butée, périodicité, durée, description) | À faire |
 | 4 | Actions requises (dépendances) avec détection des cycles | À faire |
