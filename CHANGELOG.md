@@ -24,3 +24,6 @@
 - Migration `migrations/002_task_lifecycle.sql` : colonnes `status`, `completed_at` et contraintes associées.
 - Tests sans dépendance `tests/TaskTest.php` (`php tests/TaskTest.php`) : 25 vérifications OK.
 - Fonctionnalité 3 passée à « Terminé ». Choix par défaut pour les questions ouvertes 1 et 2 (à valider).
+- Dépendances entre tâches : `DependencyGraph` (ajout/retrait, prérequis directs et indirects, détection de cycle avant ajout avec chemin fautif, `findCycle()`, ordre d'exécution topologique), `CycleException`, `DependencyRepository` (PDO, transaction + verrou de table, `replaceRequirements` en tout ou rien).
+- Tests `tests/DependencyTest.php` (`php tests/DependencyTest.php`) : 12 vérifications OK (exécutées via `php:8.3-cli`). `DependencyRepository` non testé (nécessite PostgreSQL).
+- Fonctionnalité 4 passée à « Terminé ».
