@@ -25,6 +25,10 @@ docker compose up --build
 - Les scripts `.sql` de `migrations/` sont joués à la première création de la base ; pour les rejouer : `docker compose down -v`.
 - Port déjà utilisé ? Changer les ports publiés : `APP_PORT=8081 DB_HOST_PORT=5433 docker compose up --build`.
 
+## Portail web
+
+http://localhost:8080/ : liste filtrable des tâches, création, édition, suppression, changement de statut et prérequis. Code dans `src/Web/`, styles dans `public/assets/portal.css`.
+
 ## API REST
 
 `/api/tasks` (JSON) : `GET` liste (filtres `?category=Pro|Perso`, `?status=a_faire|en_cours|terminee`), `POST` création, `GET|PUT|PATCH|DELETE /api/tasks/{id}`.

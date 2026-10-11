@@ -8,6 +8,8 @@ use App\Api\TaskApi;
 use App\Database;
 use App\Task\DependencyRepository;
 use App\Task\TaskRepository;
+use App\Web\Portal;
+use App\Web\Session;
 
 $path = (string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
@@ -31,17 +33,13 @@ if ($path === '/api' || str_starts_with($path, '/api/')) {
     exit;
 }
 
-// Le portail web (CRUD) et /mcp seront ajoutés aux étapes suivantes.
+// Portail web (pages HTML, sessions et jetons CSRF).
+$pdo = Database::connection();
+$portal = new Portal(new TaskApi(new TaskRepository($pdo), new DependencyRepository($pdo)), new Session());
+$response = $portal->handle($_SERVER['REQUEST_METHOD'] ?? 'GET', $path, $_GET, $_POST);
+http_response_code($response['status']);
+foreach ($response['headers'] as $name => $value) {
+    header("$name: $value");
+}
 header('Content-Type: text/html; charset=utf-8');
-?>
-<!doctype html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8">
-    <title>Gestionnaire d'actions</title>
-</head>
-<body>
-    <h1>Gestionnaire d'actions</h1>
-    <p>API REST disponible sur <code>/api/tasks</code>.</p>
-</body>
-</html>
+echo $response['body'];

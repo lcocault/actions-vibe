@@ -2,7 +2,7 @@
 
 États possibles : `À faire`, `En cours`, `Terminé`, `Bloqué`.
 
-Le squelette (1), le schéma SQL (2) et le modèle de tâche (3), les dépendances (4) et l'API REST (5) sont en place ; le reste reste à développer.
+Le squelette (1), le schéma SQL (2) et le modèle de tâche (3), les dépendances (4) l'API REST (5) et le portail web (6) sont en place ; le reste reste à développer.
 
 | # | Fonctionnalité | État |
 |---|----------------|------|
@@ -11,7 +11,7 @@ Le squelette (1), le schéma SQL (2) et le modèle de tâche (3), les dépendanc
 | 3 | Modèle de tâche et validation (titre, catégorie `Pro`/`Perso`, date butée, périodicité, durée, description) et cycle de vie (`a_faire` → `en_cours` → `terminee`, périodicité) | Terminé |
 | 4 | Actions requises (dépendances) avec détection des cycles | Terminé |
 | 5 | API REST CRUD (`/api/tasks`), prérequis inclus dans les réponses | Terminé |
-| 6 | Portail web CRUD (liste, création, édition, suppression, affichage des prérequis) | À faire |
+| 6 | Portail web CRUD (liste, création, édition, suppression, affichage des prérequis) | Terminé |
 | 7 | Interface MCP (HTTP, outils : créer, lister, consulter, modifier, supprimer) | À faire |
 | 8 | Authentification / protection de base (jeton API, CSRF, requêtes préparées, échappement HTML) | À faire |
 | 9 | Documentation de déploiement AlwaysData et prérequis | À faire |

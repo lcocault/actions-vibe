@@ -33,3 +33,7 @@
 - Ajout de `TaskRepository`, `Api\TaskApi` (indépendant de HTTP), routage dans `public/index.php`, `public/.htaccess` ; `DependencyRepository` rejoint désormais la transaction en cours.
 - Test d'intégration `tests/ApiTest.php` (`docker compose exec app php tests/ApiTest.php http://localhost`) : 25 vérifications OK. Pas d'authentification pour l'instant (fonctionnalité 8).
 - Fonctionnalité 5 passée à « Terminé ».
+
+- Portail web (`src/Web/` : `Portal`, `Session`, `View`, gabarits `views/`, `public/assets/portal.css`) : liste filtrable (catégorie, statut) avec prérequis et badge « Bloquée », fiche détaillée, création, édition (cases à cocher des prérequis), suppression avec confirmation, boutons de transition de statut. Le portail appelle `TaskApi` en mémoire : mêmes validations, cycles et périodicité que l'API REST.
+- Protection : jeton CSRF en session sur tous les POST, échappement HTML systématique. Vérifié manuellement sous Docker (parcours complet, 403 sans jeton, cycle refusé, occurrence suivante créée). Pas de tests automatisés du portail.
+- Fonctionnalité 6 passée à « Terminé » (l'authentification reste à faire, fonctionnalité 8).
