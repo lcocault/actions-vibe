@@ -1,0 +1,4 @@
+RewriteEngine On
+# Toute URL qui n'est pas un fichier existant passe par le point d'entrée unique.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [L]

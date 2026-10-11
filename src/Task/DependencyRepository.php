@@ -7,7 +7,10 @@ namespace App\Task;
 use PDO;
 use Throwable;
 
-/** Persistance des dépendances (table `task_dependency`) avec refus des cycles. */
+/**
+ * Persistance des dépendances (table `task_dependency`) avec refus des cycles.
+ * Les écritures rejoignent la transaction en cours si l'appelant en a ouvert une.
+ */
 final class DependencyRepository
 {
     public function __construct(private readonly PDO $pdo)
@@ -22,7 +25,8 @@ final class DependencyRepository
      */
     public function add(int $taskId, int $requiredId): void
     {
-        $this->pdo->beginTransaction();
+        $owns = !$this->pdo->inTransaction();
+        $owns && $this->pdo->beginTransaction();
         try {
             // Verrou de table : sérialise les ajouts pour que deux requêtes concurrentes ne créent pas un cycle.
             $this->pdo->exec('LOCK TABLE task_dependency IN SHARE ROW EXCLUSIVE MODE');
@@ -30,9 +34,9 @@ final class DependencyRepository
             $this->pdo->prepare(
                 'INSERT INTO task_dependency (task_id, required_task_id) VALUES (?, ?) ON CONFLICT DO NOTHING'
             )->execute([$taskId, $requiredId]);
-            $this->pdo->commit();
+            $owns && $this->pdo->commit();
         } catch (Throwable $e) {
-            $this->pdo->rollBack();
+            $owns && $this->pdo->rollBack();
             throw $e;
         }
     }
@@ -51,7 +55,8 @@ final class DependencyRepository
      */
     public function replaceRequirements(int $taskId, array $requiredIds): void
     {
-        $this->pdo->beginTransaction();
+        $owns = !$this->pdo->inTransaction();
+        $owns && $this->pdo->beginTransaction();
         try {
             $this->pdo->exec('LOCK TABLE task_dependency IN SHARE ROW EXCLUSIVE MODE');
             $this->pdo->prepare('DELETE FROM task_dependency WHERE task_id = ?')->execute([$taskId]);
@@ -61,9 +66,9 @@ final class DependencyRepository
                 $graph->add($taskId, $requiredId);
                 $insert->execute([$taskId, $requiredId]);
             }
-            $this->pdo->commit();
+            $owns && $this->pdo->commit();
         } catch (Throwable $e) {
-            $this->pdo->rollBack();
+            $owns && $this->pdo->rollBack();
             throw $e;
         }
     }

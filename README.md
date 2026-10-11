@@ -24,3 +24,8 @@ docker compose up --build
 - Test de connexion : `docker compose exec app php bin/check-db.php`
 - Les scripts `.sql` de `migrations/` sont joués à la première création de la base ; pour les rejouer : `docker compose down -v`.
 - Port déjà utilisé ? Changer les ports publiés : `APP_PORT=8081 DB_HOST_PORT=5433 docker compose up --build`.
+
+## API REST
+
+`/api/tasks` (JSON) : `GET` liste (filtres `?category=Pro|Perso`, `?status=a_faire|en_cours|terminee`), `POST` création, `GET|PUT|PATCH|DELETE /api/tasks/{id}`.
+Champs : `title`, `category`, `due_date` (AAAA-MM-JJ), `recurrence`, `duration_minutes`, `description`, `status`, `requirements` (ids des prérequis). Test : `docker compose exec app php tests/ApiTest.php http://localhost`.

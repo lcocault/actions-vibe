@@ -27,3 +27,9 @@
 - Dépendances entre tâches : `DependencyGraph` (ajout/retrait, prérequis directs et indirects, détection de cycle avant ajout avec chemin fautif, `findCycle()`, ordre d'exécution topologique), `CycleException`, `DependencyRepository` (PDO, transaction + verrou de table, `replaceRequirements` en tout ou rien).
 - Tests `tests/DependencyTest.php` (`php tests/DependencyTest.php`) : 12 vérifications OK (exécutées via `php:8.3-cli`). `DependencyRepository` non testé (nécessite PostgreSQL).
 - Fonctionnalité 4 passée à « Terminé ».
+- API REST CRUD `/api/tasks` : `GET` (filtres `category`, `status`), `POST` (201 + `Location`), `GET/PUT/PATCH/DELETE /api/tasks/{id}`. Réponses JSON `{"data": ...}` avec prérequis directs (`requirements`: id, titre, statut) ; erreurs `{"error": {code, message, details}}` (400 JSON invalide, 404, 405, 409 transition ou cycle, 422 validation).
+- `PUT` remplace les champs métier (omis = effacés), `PATCH` modifie seulement ceux fournis ; `status` déclenche une transition ; `requirements` (liste d'ids), si présent, remplace les prérequis, en transaction. Clôture d'une tâche périodique : l'occurrence suivante est créée et renvoyée dans `next_occurrence`.
+- Suppression d'une tâche : les liens de dépendance sont retirés automatiquement (choix par défaut de la question ouverte 4, à valider).
+- Ajout de `TaskRepository`, `Api\TaskApi` (indépendant de HTTP), routage dans `public/index.php`, `public/.htaccess` ; `DependencyRepository` rejoint désormais la transaction en cours.
+- Test d'intégration `tests/ApiTest.php` (`docker compose exec app php tests/ApiTest.php http://localhost`) : 25 vérifications OK. Pas d'authentification pour l'instant (fonctionnalité 8).
+- Fonctionnalité 5 passée à « Terminé ».
