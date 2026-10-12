@@ -33,3 +33,7 @@ http://localhost:8080/ : liste filtrable des tâches, création, édition, suppr
 
 `/api/tasks` (JSON) : `GET` liste (filtres `?category=Pro|Perso`, `?status=a_faire|en_cours|terminee`), `POST` création, `GET|PUT|PATCH|DELETE /api/tasks/{id}`.
 Champs : `title`, `category`, `due_date` (AAAA-MM-JJ), `recurrence`, `duration_minutes`, `description`, `status`, `requirements` (ids des prérequis). Test : `docker compose exec app php tests/ApiTest.php http://localhost`.
+
+## MCP
+
+Endpoint `POST /mcp` (MCP, transport HTTP, JSON-RPC 2.0). Outils : `create_task`, `list_tasks`, `get_task`, `update_task`, `delete_task` (mêmes champs que l'API REST). Test : `docker compose exec app php tests/McpTest.php http://localhost`.

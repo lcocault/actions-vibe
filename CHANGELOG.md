@@ -37,3 +37,10 @@
 - Portail web (`src/Web/` : `Portal`, `Session`, `View`, gabarits `views/`, `public/assets/portal.css`) : liste filtrable (catégorie, statut) avec prérequis et badge « Bloquée », fiche détaillée, création, édition (cases à cocher des prérequis), suppression avec confirmation, boutons de transition de statut. Le portail appelle `TaskApi` en mémoire : mêmes validations, cycles et périodicité que l'API REST.
 - Protection : jeton CSRF en session sur tous les POST, échappement HTML systématique. Vérifié manuellement sous Docker (parcours complet, 403 sans jeton, cycle refusé, occurrence suivante créée). Pas de tests automatisés du portail.
 - Fonctionnalité 6 passée à « Terminé » (l'authentification reste à faire, fonctionnalité 8).
+
+## 2026-10-12
+
+- Interface MCP : `src/Mcp/McpServer.php` (JSON-RPC 2.0, transport Streamable HTTP, endpoint `POST /mcp`), indépendante de HTTP et réutilisant `TaskApi` en mémoire (mêmes validations, cycles et périodicité). Méthodes : `initialize` (négociation de version), `ping`, `tools/list`, `tools/call`, notifications (202), lots ; `GET` -> 405.
+- Outils : `create_task`, `list_tasks` (filtres `category`, `status`), `get_task`, `update_task` (modification partielle, `status`, `requirements`), `delete_task`. Les erreurs métier sont renvoyées avec `isError: true` et le même corps d'erreur que l'API REST.
+- Test d'intégration `tests/McpTest.php` (`docker compose exec app php tests/McpTest.php http://localhost`) : 22 vérifications OK ; `ApiTest` toujours OK. Pas d'authentification pour l'instant (fonctionnalité 8).
+- Fonctionnalité 7 passée à « Terminé ».
