@@ -186,6 +186,8 @@ final class McpServer
             ],
             'duration_minutes' => ['type' => ['integer', 'null'], 'minimum' => 1, 'description' => 'Durée estimée en minutes.'],
             'description' => ['type' => ['string', 'null'], 'description' => 'Description libre.'],
+            'project' => ['type' => ['string', 'null'], 'description' => 'Projet auquel la tâche se rattache (255 caractères max).'],
+            'conclusions' => ['type' => ['string', 'null'], 'description' => 'Conclusions, enseignements ou résultat de la tâche.'],
             'requirements' => [
                 'type' => 'array',
                 'items' => ['type' => 'integer', 'minimum' => 1],

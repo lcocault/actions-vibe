@@ -49,6 +49,16 @@ $action = $task === null ? '/tasks' : '/tasks/' . (int) $task['id'];
         <?php if (isset($errors['description'])): ?><span class="error"><?= View::h($errors['description']) ?></span><?php endif; ?>
     </label>
 
+    <label>Projet
+        <input type="text" name="project" maxlength="255" value="<?= View::h($v('project')) ?>">
+        <?php if (isset($errors['project'])): ?><span class="error"><?= View::h($errors['project']) ?></span><?php endif; ?>
+    </label>
+
+    <label>Conclusions
+        <textarea name="conclusions" rows="5"><?= View::h($v('conclusions')) ?></textarea>
+        <?php if (isset($errors['conclusions'])): ?><span class="error"><?= View::h($errors['conclusions']) ?></span><?php endif; ?>
+    </label>
+
     <fieldset>
         <legend>Actions requises</legend>
         <?php if ($candidates === []): ?>

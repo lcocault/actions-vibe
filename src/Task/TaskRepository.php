@@ -9,7 +9,7 @@ use PDO;
 /** Persistance des tâches (table `task`). */
 final class TaskRepository
 {
-    private const COLUMNS = 'id, title, category, due_date, recurrence, duration_minutes, description, status, completed_at';
+    private const COLUMNS = 'id, title, category, due_date, recurrence, duration_minutes, description, project, conclusions, status, completed_at';
 
     public function __construct(private readonly PDO $pdo)
     {
@@ -48,8 +48,8 @@ final class TaskRepository
     public function insert(Task $task): Task
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO task (title, category, due_date, recurrence, duration_minutes, description, status, completed_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING ' . self::COLUMNS
+            'INSERT INTO task (title, category, due_date, recurrence, duration_minutes, description, project, conclusions, status, completed_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING ' . self::COLUMNS
         );
         $stmt->execute($this->values($task));
         return Task::fromRow($stmt->fetch());
@@ -60,7 +60,7 @@ final class TaskRepository
     {
         $stmt = $this->pdo->prepare(
             'UPDATE task SET title = ?, category = ?, due_date = ?, recurrence = ?, duration_minutes = ?,
-                 description = ?, status = ?, completed_at = ?, updated_at = now()
+                 description = ?, project = ?, conclusions = ?, status = ?, completed_at = ?, updated_at = now()
              WHERE id = ?'
         );
         $stmt->execute([...$this->values($task), $task->id]);
@@ -130,7 +130,7 @@ final class TaskRepository
         $a = $task->toArray();
         return [
             $a['title'], $a['category'], $a['due_date'], $a['recurrence'], $a['duration_minutes'],
-            $a['description'], $a['status'], $a['completed_at'],
+            $a['description'], $a['project'], $a['conclusions'], $a['status'], $a['completed_at'],
         ];
     }
 }

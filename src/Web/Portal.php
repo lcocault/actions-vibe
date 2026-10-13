@@ -13,7 +13,7 @@ use App\Api\TaskApi;
  */
 final class Portal
 {
-    private const FIELDS = ['title', 'category', 'due_date', 'recurrence', 'duration_minutes', 'description'];
+    private const FIELDS = ['title', 'category', 'due_date', 'recurrence', 'duration_minutes', 'description', 'project', 'conclusions'];
 
     public function __construct(private readonly TaskApi $api, private readonly Session $session)
     {

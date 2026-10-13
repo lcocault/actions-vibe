@@ -10,6 +10,7 @@ use DateTimeImmutable;
 final class Task
 {
     public const TITLE_MAX_LENGTH = 255;
+    public const PROJECT_MAX_LENGTH = 255;
 
     private function __construct(
         public readonly ?int $id,
@@ -19,6 +20,8 @@ final class Task
         public readonly ?Recurrence $recurrence,
         public readonly ?int $durationMinutes,
         public readonly ?string $description,
+        public readonly ?string $project,
+        public readonly ?string $conclusions,
         public readonly Status $status,
         public readonly ?DateTimeImmutable $completedAt,
     ) {
@@ -52,6 +55,8 @@ final class Task
             isset($row['recurrence']) ? Recurrence::from((string) $row['recurrence']) : null,
             isset($row['duration_minutes']) ? (int) $row['duration_minutes'] : null,
             $row['description'] ?? null,
+            $row['project'] ?? null,
+            $row['conclusions'] ?? null,
             $status,
             isset($row['completed_at']) ? new DateTimeImmutable((string) $row['completed_at']) : null,
         );
@@ -102,6 +107,8 @@ final class Task
             $this->recurrence,
             $this->durationMinutes,
             $this->description,
+            $this->project,
+            null,
             Status::AFaire,
             null,
         );
@@ -118,6 +125,8 @@ final class Task
             'recurrence' => $this->recurrence?->value,
             'duration_minutes' => $this->durationMinutes,
             'description' => $this->description,
+            'project' => $this->project,
+            'conclusions' => $this->conclusions,
             'status' => $this->status->value,
             'completed_at' => $this->completedAt?->format(DATE_ATOM),
         ];
@@ -136,6 +145,8 @@ final class Task
             $this->recurrence,
             $this->durationMinutes,
             $this->description,
+            $this->project,
+            $this->conclusions,
             $target,
             $completedAt,
         );
@@ -143,7 +154,7 @@ final class Task
 
     /**
      * @param array<string,mixed> $data
-     * @return array{title:string,category:Category,dueDate:?DateTimeImmutable,recurrence:?Recurrence,durationMinutes:?int,description:?string}
+     * @return array{title:string,category:Category,dueDate:?DateTimeImmutable,recurrence:?Recurrence,durationMinutes:?int,description:?string,project:?string,conclusions:?string}
      * @throws ValidationException
      */
     private static function validate(array $data): array
@@ -204,6 +215,27 @@ final class Task
             $description = null;
         }
 
+        $project = $data['project'] ?? null;
+        if ($project !== null && !is_string($project)) {
+            $errors['project'] = 'Le projet doit être un texte.';
+            $project = null;
+        } elseif ($project !== null) {
+            $project = trim($project);
+            if ($project === '') {
+                $project = null;
+            } elseif (mb_strlen($project) > self::PROJECT_MAX_LENGTH) {
+                $errors['project'] = 'Le projet ne doit pas dépasser ' . self::PROJECT_MAX_LENGTH . ' caractères.';
+            }
+        }
+
+        $conclusions = $data['conclusions'] ?? null;
+        if ($conclusions !== null && !is_string($conclusions)) {
+            $errors['conclusions'] = 'Les conclusions doivent être un texte.';
+            $conclusions = null;
+        } elseif ($conclusions !== null && trim($conclusions) === '') {
+            $conclusions = null;
+        }
+
         if ($errors !== []) {
             throw new ValidationException($errors);
         }
@@ -215,6 +247,8 @@ final class Task
             'recurrence' => $recurrence,
             'durationMinutes' => $duration,
             'description' => $description,
+            'project' => $project,
+            'conclusions' => $conclusions,
         ];
     }
 }

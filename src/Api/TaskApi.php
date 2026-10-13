@@ -143,7 +143,7 @@ final class TaskApi
             return $this->notFound();
         }
 
-        $fields = ['title', 'category', 'due_date', 'recurrence', 'duration_minutes', 'description'];
+        $fields = ['title', 'category', 'due_date', 'recurrence', 'duration_minutes', 'description', 'project', 'conclusions'];
         $changes = array_intersect_key($data, array_flip($fields));
         if ($replace) {
             $changes += array_fill_keys($fields, null);

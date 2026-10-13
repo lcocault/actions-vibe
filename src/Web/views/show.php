@@ -10,6 +10,8 @@
         <dt>Terminée le</dt><dd><?= View::h(View::date($task['completed_at'])) ?></dd>
     <?php endif; ?>
     <dt>Description</dt><dd><?= $task['description'] !== null ? nl2br(View::h($task['description'])) : '—' ?></dd>
+    <dt>Projet</dt><dd><?= $task['project'] !== null ? View::h($task['project']) : '—' ?></dd>
+    <dt>Conclusions</dt><dd><?= $task['conclusions'] !== null ? nl2br(View::h($task['conclusions'])) : '—' ?></dd>
     <dt>Actions requises</dt>
     <dd>
         <?php if ($task['requirements'] === []): ?>

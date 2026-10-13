@@ -44,3 +44,8 @@
 - Outils : `create_task`, `list_tasks` (filtres `category`, `status`), `get_task`, `update_task` (modification partielle, `status`, `requirements`), `delete_task`. Les erreurs métier sont renvoyées avec `isError: true` et le même corps d'erreur que l'API REST.
 - Test d'intégration `tests/McpTest.php` (`docker compose exec app php tests/McpTest.php http://localhost`) : 22 vérifications OK ; `ApiTest` toujours OK. Pas d'authentification pour l'instant (fonctionnalité 8).
 - Fonctionnalité 7 passée à « Terminé ».
+
+## 2026-10-13
+
+- Modèle de tâche : ajout des champs optionnels `project` (texte, 255 caractères max) et `conclusions` (texte libre), propagés dans la persistance, l'API REST, le portail (formulaire et fiche) et les outils MCP. L'occurrence suivante d'une tâche périodique conserve le projet mais pas les conclusions.
+- Migration `migrations/003_task_project_conclusions.sql` (à appliquer à la main sur une base existante) ; tests unitaires ajoutés dans `tests/TaskTest.php`.
