@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Web;
 
+use App\Api\ProjectApi;
 use App\Api\TaskApi;
 
 /**
@@ -15,7 +16,11 @@ final class Portal
 {
     private const FIELDS = ['title', 'category', 'due_date', 'recurrence', 'duration_minutes', 'description', 'project', 'conclusions'];
 
-    public function __construct(private readonly TaskApi $api, private readonly Session $session)
+    public function __construct(
+        private readonly TaskApi $api,
+        private readonly ProjectApi $projectApi,
+        private readonly Session $session,
+    )
     {
     }
 
@@ -41,6 +46,25 @@ final class Portal
         }
         if ($path === '/tasks') {
             return $method === 'POST' ? $this->save(null, $post) : $this->notAllowed();
+        }
+        if ($path === '/projects') {
+            return match ($method) {
+                'GET' => $this->projects(),
+                'POST' => $this->saveProject(null, $post),
+                default => $this->notAllowed(),
+            };
+        }
+        if ($path === '/projects/new') {
+            return $method === 'GET' ? $this->projectForm(null, [], []) : $this->notAllowed();
+        }
+        if (preg_match('#^/projects/(\d+)(?:/(edit|delete))?$#', $path, $m)) {
+            $id = (int) $m[1];
+            return match ([$method, $m[2] ?? '']) {
+                ['GET', 'edit'] => $this->editProject($id),
+                ['POST', ''] => $this->saveProject($id, $post),
+                ['POST', 'delete'] => $this->deleteProject($id),
+                default => $this->notAllowed(),
+            };
         }
         if (preg_match('#^/tasks/(\d+)(?:/(edit|status|delete))?$#', $path, $m)) {
             $id = (int) $m[1];
@@ -95,6 +119,9 @@ final class Portal
             if ($body[$key] === '') {
                 $body[$key] = null;
             }
+        }
+        if (isset($body['project'])) {
+            unset($body['category']); // la catégorie est celle du projet
         }
         $requirements = $post['requirements'] ?? [];
         $body['requirements'] = is_array($requirements)
@@ -174,7 +201,80 @@ final class Portal
             'values' => $values,
             'errors' => $errors,
             'candidates' => $candidates,
+            'projects' => $this->projectApi->handle('GET', '/api/projects')['body']['data'] ?? [],
         ]);
+    }
+
+    private function projects(): array
+    {
+        $r = $this->projectApi->handle('GET', '/api/projects');
+        return $this->page(200, 'Projets', 'projects', ['projects' => $r['body']['data'] ?? []]);
+    }
+
+    private function editProject(int $id): array
+    {
+        $project = $this->loadProject($id);
+        return $project === null ? $this->missingProject() : $this->projectForm($project, $project, []);
+    }
+
+    /** @param array<string,mixed> $post */
+    private function saveProject(?int $id, array $post): array
+    {
+        $body = [];
+        foreach (['name', 'category'] as $key) {
+            $body[$key] = is_string($post[$key] ?? null) ? trim($post[$key]) : null;
+        }
+        $r = $id === null
+            ? $this->projectApi->handle('POST', '/api/projects', [], json_encode($body, JSON_THROW_ON_ERROR))
+            : $this->projectApi->handle('PUT', "/api/projects/$id", [], json_encode($body, JSON_THROW_ON_ERROR));
+        if ($r['status'] === 404) {
+            return $this->missingProject();
+        }
+        if ($r['status'] >= 400) {
+            return $this->projectForm($id === null ? null : $this->loadProject($id), $post, $this->errors($r));
+        }
+        $this->session->flash($id === null ? 'Projet créé.' : 'Projet modifié.');
+        return $this->redirect('/projects');
+    }
+
+    private function deleteProject(int $id): array
+    {
+        $r = $this->projectApi->handle('DELETE', "/api/projects/$id");
+        if ($r['status'] === 404) {
+            return $this->missingProject();
+        }
+        if ($r['status'] >= 400) {
+            $this->session->flash($r['body']['error']['message'] ?? 'Suppression impossible.', 'error');
+        } else {
+            $this->session->flash('Projet supprimé.');
+        }
+        return $this->redirect('/projects');
+    }
+
+    /**
+     * @param ?array<string,mixed> $project projet édité (null en création)
+     * @param array<string,mixed> $values
+     * @param array<string,string> $errors
+     */
+    private function projectForm(?array $project, array $values, array $errors): array
+    {
+        return $this->page($errors === [] ? 200 : 422, $project === null ? 'Nouveau projet' : 'Modifier le projet', 'project_form', [
+            'project' => $project,
+            'values' => $values,
+            'errors' => $errors,
+        ]);
+    }
+
+    /** @return ?array<string,mixed> */
+    private function loadProject(int $id): ?array
+    {
+        $r = $this->projectApi->handle('GET', "/api/projects/$id");
+        return $r['status'] === 200 ? $r['body']['data'] : null;
+    }
+
+    private function missingProject(): array
+    {
+        return $this->page(404, 'Projet introuvable', 'error', ['message' => 'Ce projet n\'existe pas (ou plus).']);
     }
 
     /** @return ?array<string,mixed> */

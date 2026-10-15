@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Mcp;
 
+use App\Api\ProjectApi;
 use App\Api\TaskApi;
 use JsonException;
 
@@ -21,7 +22,7 @@ final class McpServer
     private const METHOD_NOT_FOUND = -32601;
     private const INVALID_PARAMS = -32602;
 
-    public function __construct(private readonly TaskApi $api)
+    public function __construct(private readonly TaskApi $api, private readonly ProjectApi $projectApi)
     {
     }
 
@@ -106,7 +107,7 @@ final class McpServer
             'protocolVersion' => $version,
             'capabilities' => ['tools' => ['listChanged' => false]],
             'serverInfo' => ['name' => 'actions-vibe', 'version' => '1.0.0'],
-            'instructions' => 'Gestion de tâches Pro/Perso avec prérequis, statuts et périodicité.',
+            'instructions' => 'Gestion de tâches avec prérequis, statuts et périodicité, rattachées à des projets Pro/Perso (la catégorie d'une tâche est celle de son projet).',
         ];
     }
 
@@ -124,12 +125,12 @@ final class McpServer
 
         $taskId = $args['id'] ?? null;
         $fields = array_diff_key($args, ['id' => true]);
-        $needsId = in_array($name, ['get_task', 'update_task', 'delete_task'], true);
+        $needsId = in_array($name, ['get_task', 'update_task', 'delete_task', 'get_project', 'update_project', 'delete_project'], true);
         if ($needsId && (!is_int($taskId) || $taskId < 1)) {
             return $this->success($id, $this->toolResult(['error' => [
                 'code' => 'validation_failed',
                 'message' => 'Données invalides.',
-                'details' => ['id' => 'Identifiant de tâche requis (entier positif).'],
+                'details' => ['id' => 'Identifiant requis (entier positif).'],
             ]], true));
         }
 
@@ -139,6 +140,11 @@ final class McpServer
             'create_task' => $this->api->handle('POST', '/api/tasks', [], $this->encode($fields)),
             'update_task' => $this->api->handle('PATCH', "/api/tasks/$taskId", [], $this->encode($fields)),
             'delete_task' => $this->api->handle('DELETE', "/api/tasks/$taskId"),
+            'list_projects' => $this->projectApi->handle('GET', '/api/projects', array_intersect_key($args, ['category' => 1])),
+            'get_project' => $this->projectApi->handle('GET', "/api/projects/$taskId"),
+            'create_project' => $this->projectApi->handle('POST', '/api/projects', [], $this->encode($fields)),
+            'update_project' => $this->projectApi->handle('PATCH', "/api/projects/$taskId", [], $this->encode($fields)),
+            'delete_project' => $this->projectApi->handle('DELETE', "/api/projects/$taskId"),
             default => null,
         };
         if ($response === null) {
@@ -172,9 +178,14 @@ final class McpServer
     /** @return list<array<string,mixed>> */
     private function tools(): array
     {
-        $category = ['type' => 'string', 'enum' => ['Pro', 'Perso'], 'description' => 'Catégorie de la tâche.'];
+        $category = ['type' => 'string', 'enum' => ['Pro', 'Perso'], 'description' => 'Catégorie (déduite du projet si la tâche en a un).'];
         $status = ['type' => 'string', 'enum' => ['a_faire', 'en_cours', 'terminee'], 'description' => 'Statut de la tâche.'];
         $idProp = ['type' => 'integer', 'minimum' => 1, 'description' => 'Identifiant de la tâche.'];
+        $projectId = ['type' => 'integer', 'minimum' => 1, 'description' => 'Identifiant du projet.'];
+        $projectFields = [
+            'name' => ['type' => 'string', 'description' => 'Nom unique du projet (255 caractères max).'],
+            'category' => ['type' => 'string', 'enum' => ['Pro', 'Perso'], 'description' => 'Catégorie du projet.'],
+        ];
         $fields = [
             'title' => ['type' => 'string', 'description' => 'Titre (obligatoire à la création).'],
             'category' => $category,
@@ -186,7 +197,7 @@ final class McpServer
             ],
             'duration_minutes' => ['type' => ['integer', 'null'], 'minimum' => 1, 'description' => 'Durée estimée en minutes.'],
             'description' => ['type' => ['string', 'null'], 'description' => 'Description libre.'],
-            'project' => ['type' => ['string', 'null'], 'description' => 'Projet auquel la tâche se rattache (255 caractères max).'],
+            'project' => ['type' => ['string', 'null'], 'description' => 'Nom d\'un projet existant (voir list_projects). La catégorie de la tâche est alors celle du projet.'],
             'conclusions' => ['type' => ['string', 'null'], 'description' => 'Conclusions, enseignements ou résultat de la tâche.'],
             'requirements' => [
                 'type' => 'array',
@@ -225,6 +236,31 @@ final class McpServer
                 'name' => 'delete_task',
                 'description' => 'Supprime une tâche (les liens de dépendance associés sont retirés).',
                 'inputSchema' => ['type' => 'object', 'properties' => ['id' => $idProp], 'required' => ['id']],
+            ],
+            [
+                'name' => 'list_projects',
+                'description' => 'Liste les projets configurés (nom, catégorie Pro/Perso, nombre de tâches).',
+                'inputSchema' => ['type' => 'object', 'properties' => ['category' => $category]],
+            ],
+            [
+                'name' => 'get_project',
+                'description' => 'Consulte un projet.',
+                'inputSchema' => ['type' => 'object', 'properties' => ['id' => $projectId], 'required' => ['id']],
+            ],
+            [
+                'name' => 'create_project',
+                'description' => 'Crée un projet ; ses tâches héritent de sa catégorie.',
+                'inputSchema' => ['type' => 'object', 'properties' => $projectFields, 'required' => ['name', 'category']],
+            ],
+            [
+                'name' => 'update_project',
+                'description' => 'Renomme un projet ou change sa catégorie (appliquée à toutes ses tâches).',
+                'inputSchema' => ['type' => 'object', 'properties' => ['id' => $projectId] + $projectFields, 'required' => ['id']],
+            ],
+            [
+                'name' => 'delete_project',
+                'description' => 'Supprime un projet (refusé tant que des tâches y sont rattachées).',
+                'inputSchema' => ['type' => 'object', 'properties' => ['id' => $projectId], 'required' => ['id']],
             ],
         ];
     }

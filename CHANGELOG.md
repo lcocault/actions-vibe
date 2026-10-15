@@ -49,3 +49,10 @@
 
 - Modèle de tâche : ajout des champs optionnels `project` (texte, 255 caractères max) et `conclusions` (texte libre), propagés dans la persistance, l'API REST, le portail (formulaire et fiche) et les outils MCP. L'occurrence suivante d'une tâche périodique conserve le projet mais pas les conclusions.
 - Migration `migrations/003_task_project_conclusions.sql` (à appliquer à la main sur une base existante) ; tests unitaires ajoutés dans `tests/TaskTest.php`.
+
+## 2026-10-15
+
+- Projets configurables : table `project` (nom unique, catégorie Pro/Perso), migration `migrations/004_project.sql` (reprend les projets texte libre existants ; clé étrangère `task.project` -> `project.name`, renommage en cascade, suppression refusée si utilisé).
+- La catégorie est portée par le projet : une tâche rattachée à un projet en hérite (déduite si absente, 422 si elle le contredit) ; le projet doit exister (422 sinon). Changer la catégorie d'un projet la propage à ses tâches.
+- `Task\Project`, `ProjectRepository`, `Api\ProjectApi` (`/api/projects`, 409 `project_in_use`), pages portail `/projects` (liste, création, édition, suppression) et sélecteur de projet dans le formulaire de tâche, outils MCP `*_project`. Constructeurs de `TaskApi`, `McpServer` et `Portal` étendus.
+- Tests ajoutés (`TaskTest`, `ApiTest`, `McpTest`) mais non exécutés : ni PHP ni Docker disponibles dans cet environnement.

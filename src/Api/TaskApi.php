@@ -8,6 +8,7 @@ use App\Task\Category;
 use App\Task\CycleException;
 use App\Task\DependencyRepository;
 use App\Task\InvalidTransitionException;
+use App\Task\ProjectRepository;
 use App\Task\Status;
 use App\Task\Task;
 use App\Task\TaskRepository;
@@ -23,6 +24,7 @@ final class TaskApi
     public function __construct(
         private readonly TaskRepository $tasks,
         private readonly DependencyRepository $dependencies,
+        private readonly ProjectRepository $projects,
     ) {
     }
 
@@ -109,7 +111,7 @@ final class TaskApi
     /** @param array<string,mixed> $data */
     private function create(array $data): array
     {
-        $task = Task::create($data);
+        $task = Task::create($this->withProjectCategory($data));
         $requiredIds = $this->requiredIds($data);
 
         $pdo = $this->tasks->pdo();
@@ -148,7 +150,7 @@ final class TaskApi
         if ($replace) {
             $changes += array_fill_keys($fields, null);
         }
-        $updated = $task->with($changes);
+        $updated = $task->with($this->withProjectCategory($changes, $task->project));
 
         $target = null;
         if (array_key_exists('status', $data)) {
@@ -224,6 +226,35 @@ final class TaskApi
             throw new ValidationException(['requirements' => 'Tâches inexistantes : ' . implode(', ', $missing) . '.']);
         }
         return $ids;
+    }
+
+    /**
+     * La catégorie d'une tâche rattachée à un projet est celle du projet : elle est déduite si absente
+     * et refusée si elle la contredit. Le projet doit exister dans la liste des projets.
+     *
+     * @param array<string,mixed> $data
+     * @param ?string $current projet actuel de la tâche (mise à jour partielle)
+     * @return array<string,mixed>
+     * @throws ValidationException
+     */
+    private function withProjectCategory(array $data, ?string $current = null): array
+    {
+        $name = array_key_exists('project', $data) ? $data['project'] : $current;
+        if (!is_string($name) || trim($name) === '') {
+            return $data;
+        }
+        $name = trim($name);
+        $project = $this->projects->findByName($name);
+        if ($project === null) {
+            throw new ValidationException(['project' => "Projet inconnu : « $name ». Ajoutez-le d'abord à la liste des projets."]);
+        }
+        $given = $data['category'] ?? null;
+        if ($given !== null && $given !== '' && $given !== $project->category->value) {
+            throw new ValidationException(['category' => 'La catégorie est imposée par le projet : « ' . $project->category->value . ' ».']);
+        }
+        $data['project'] = $name;
+        $data['category'] = $project->category->value;
+        return $data;
     }
 
     /** @return array<string,mixed> */

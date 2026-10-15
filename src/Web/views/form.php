@@ -15,7 +15,17 @@ $action = $task === null ? '/tasks' : '/tasks/' . (int) $task['id'];
         <?php if (isset($errors['title'])): ?><span class="error"><?= View::h($errors['title']) ?></span><?php endif; ?>
     </label>
 
-    <label>Catégorie *
+    <label>Projet <small>(<a href="/projects">gérer la liste</a>)</small>
+        <select name="project">
+            <option value="">Aucun</option>
+            <?php foreach ($projects as $p): ?>
+                <option value="<?= View::h($p['name']) ?>"<?= $v('project') === $p['name'] ? ' selected' : '' ?>><?= View::h($p['name']) ?> (<?= View::h($p['category']) ?>)</option>
+            <?php endforeach; ?>
+        </select>
+        <?php if (isset($errors['project'])): ?><span class="error"><?= View::h($errors['project']) ?></span><?php endif; ?>
+    </label>
+
+    <label>Catégorie * <small>(ignorée si un projet est choisi : c'est celle du projet)</small>
         <select name="category" required>
             <?php foreach (['Pro', 'Perso'] as $c): ?>
                 <option value="<?= $c ?>"<?= $v('category') === $c ? ' selected' : '' ?>><?= $c ?></option>
@@ -47,11 +57,6 @@ $action = $task === null ? '/tasks' : '/tasks/' . (int) $task['id'];
     <label>Description
         <textarea name="description" rows="5"><?= View::h($v('description')) ?></textarea>
         <?php if (isset($errors['description'])): ?><span class="error"><?= View::h($errors['description']) ?></span><?php endif; ?>
-    </label>
-
-    <label>Projet
-        <input type="text" name="project" maxlength="255" value="<?= View::h($v('project')) ?>">
-        <?php if (isset($errors['project'])): ?><span class="error"><?= View::h($errors['project']) ?></span><?php endif; ?>
     </label>
 
     <label>Conclusions

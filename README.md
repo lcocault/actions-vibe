@@ -34,6 +34,10 @@ http://localhost:8080/ : liste filtrable des tâches, création, édition, suppr
 `/api/tasks` (JSON) : `GET` liste (filtres `?category=Pro|Perso`, `?status=a_faire|en_cours|terminee`), `POST` création, `GET|PUT|PATCH|DELETE /api/tasks/{id}`.
 Champs : `title`, `category`, `due_date` (AAAA-MM-JJ), `recurrence`, `duration_minutes`, `description`, `project`, `conclusions`, `status`, `requirements` (ids des prérequis). Test : `docker compose exec app php tests/ApiTest.php http://localhost`.
 
+## Projets
+
+Liste configurable : portail `/projects`, API `/api/projects` (`GET` avec filtre `?category=`, `POST`, `GET|PUT|PATCH|DELETE /api/projects/{id}`), champs `name` (unique) et `category` (`Pro`/`Perso`). Une tâche se rattache à un projet existant par son nom (`project`) et hérite de sa catégorie (refusée si elle la contredit). Changer la catégorie d'un projet l'applique à ses tâches, le renommer met à jour ses tâches, le supprimer est refusé (409) tant qu'il a des tâches. Migration `migrations/004_project.sql` (à appliquer à la main sur une base existante ; reprend les projets texte libre existants).
+
 ## MCP
 
-Endpoint `POST /mcp` (MCP, transport HTTP, JSON-RPC 2.0). Outils : `create_task`, `list_tasks`, `get_task`, `update_task`, `delete_task` (mêmes champs que l'API REST). Test : `docker compose exec app php tests/McpTest.php http://localhost`.
+Endpoint `POST /mcp` (MCP, transport HTTP, JSON-RPC 2.0). Outils : `create_task`, `list_tasks`, `get_task`, `update_task`, `delete_task`, `create_project`, `list_projects`, `get_project`, `update_project`, `delete_project` (mêmes champs que l'API REST). Test : `docker compose exec app php tests/McpTest.php http://localhost`.

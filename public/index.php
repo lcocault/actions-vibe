@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 require dirname(__DIR__) . '/src/bootstrap.php';
 
+use App\Api\ProjectApi;
 use App\Api\TaskApi;
 use App\Database;
 use App\Mcp\McpServer;
 use App\Task\DependencyRepository;
+use App\Task\ProjectRepository;
 use App\Task\TaskRepository;
 use App\Web\Portal;
 use App\Web\Session;
@@ -17,7 +19,10 @@ $path = (string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 if ($path === '/api' || str_starts_with($path, '/api/')) {
     try {
         $pdo = Database::connection();
-        $api = new TaskApi(new TaskRepository($pdo), new DependencyRepository($pdo));
+        $projects = new ProjectRepository($pdo);
+        $api = str_starts_with($path . '/', '/api/projects/')
+            ? new ProjectApi($projects)
+            : new TaskApi(new TaskRepository($pdo), new DependencyRepository($pdo), $projects);
         $response = $api->handle($_SERVER['REQUEST_METHOD'] ?? 'GET', $path, $_GET, (string) file_get_contents('php://input'));
     } catch (Throwable $e) {
         error_log((string) $e);
@@ -37,7 +42,8 @@ if ($path === '/api' || str_starts_with($path, '/api/')) {
 if ($path === '/mcp' || $path === '/mcp/') {
     try {
         $pdo = Database::connection();
-        $mcp = new McpServer(new TaskApi(new TaskRepository($pdo), new DependencyRepository($pdo)));
+        $projects = new ProjectRepository($pdo);
+        $mcp = new McpServer(new TaskApi(new TaskRepository($pdo), new DependencyRepository($pdo), $projects), new ProjectApi($projects));
         $response = $mcp->handle($_SERVER['REQUEST_METHOD'] ?? 'POST', (string) file_get_contents('php://input'));
     } catch (Throwable $e) {
         error_log((string) $e);
@@ -59,7 +65,12 @@ if ($path === '/mcp' || $path === '/mcp/') {
 
 // Portail web (pages HTML, sessions et jetons CSRF).
 $pdo = Database::connection();
-$portal = new Portal(new TaskApi(new TaskRepository($pdo), new DependencyRepository($pdo)), new Session());
+$projects = new ProjectRepository($pdo);
+$portal = new Portal(
+    new TaskApi(new TaskRepository($pdo), new DependencyRepository($pdo), $projects),
+    new ProjectApi($projects),
+    new Session(),
+);
 $response = $portal->handle($_SERVER['REQUEST_METHOD'] ?? 'GET', $path, $_GET, $_POST);
 http_response_code($response['status']);
 foreach ($response['headers'] as $name => $value) {

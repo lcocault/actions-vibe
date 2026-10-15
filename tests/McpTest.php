@@ -49,7 +49,7 @@ check('ping', $s === 200 && $r['id'] === 2 && array_key_exists('result', $r));
 [$s, $r] = post(['jsonrpc' => '2.0', 'id' => 3, 'method' => 'tools/list']);
 $names = array_column($r['result']['tools'] ?? [], 'name');
 sort($names);
-check('tools/list : 5 outils avec schéma', $s === 200 && $names === ['create_task', 'delete_task', 'get_task', 'list_tasks', 'update_task'] && isset($r['result']['tools'][0]['inputSchema']['type']));
+check('tools/list : 10 outils avec schéma', $s === 200 && $names === ['create_project', 'create_task', 'delete_project', 'delete_task', 'get_project', 'get_task', 'list_projects', 'list_tasks', 'update_project', 'update_task'] && isset($r['result']['tools'][0]['inputSchema']['type']));
 [$s, $r] = post(['jsonrpc' => '2.0', 'id' => 4, 'method' => 'inconnue']);
 check('méthode inconnue -> -32601', $r['error']['code'] === -32601);
 [$s, $r] = post(null, '{pas du json');

@@ -13,6 +13,7 @@ Le squelette (1), le schéma SQL (2) et le modèle de tâche (3), les dépendanc
 | 5 | API REST CRUD (`/api/tasks`), prérequis inclus dans les réponses | Terminé |
 | 6 | Portail web CRUD (liste, création, édition, suppression, affichage des prérequis) | Terminé |
 | 7 | Interface MCP (HTTP, outils : créer, lister, consulter, modifier, supprimer) | Terminé |
+| 7b | Projets configurables (liste CRUD sur API, portail et MCP) ; la catégorie Pro/Perso est portée par le projet et héritée par ses tâches | Terminé |
 | 8 | Authentification / protection de base (jeton API, CSRF, requêtes préparées, échappement HTML) | À faire |
 | 9 | Documentation de déploiement AlwaysData et prérequis | À faire |
 

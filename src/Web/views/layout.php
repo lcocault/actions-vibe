@@ -12,6 +12,7 @@
     <a class="brand" href="/">Gestionnaire d'actions</a>
     <nav>
         <a href="/">Actions</a>
+        <a href="/projects">Projets</a>
         <a class="btn" href="/tasks/new">+ Nouvelle tâche</a>
     </nav>
 </header>

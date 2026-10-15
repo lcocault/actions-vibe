@@ -6,7 +6,9 @@ declare(strict_types=1);
 
 require __DIR__ . '/../src/autoload.php';
 
+use App\Task\Category;
 use App\Task\InvalidTransitionException;
+use App\Task\Project;
 use App\Task\Recurrence;
 use App\Task\Status;
 use App\Task\Task;
@@ -87,5 +89,12 @@ check('conclusions conservées par complete()', $pc->start()->complete()->conclu
 $row = Task::fromRow(['id' => '7', 'title' => 'A', 'category' => 'Perso', 'due_date' => '2026-05-01', 'recurrence' => null,
     'duration_minutes' => null, 'description' => null, 'project' => 'Alpha', 'conclusions' => null, 'status' => 'en_cours', 'completed_at' => null]);
 check('fromRow', $row->id === 7 && $row->project === 'Alpha' && $row->status === Status::EnCours && $row->dueDate?->format('Y-m-d') === '2026-05-01');
+
+// Projet
+$p = Project::create(['name' => '  Alpha ', 'category' => 'Pro']);
+check('projet : nom nettoyé, catégorie', $p->name === 'Alpha' && $p->category === Category::Pro);
+check('projet : nom vide refusé', throws(fn() => Project::create(['name' => ' ', 'category' => 'Pro']), ValidationException::class));
+check('projet : catégorie invalide refusée', throws(fn() => Project::create(['name' => 'A', 'category' => 'x']), ValidationException::class));
+check('projet : with() change la catégorie', $p->with(['category' => 'Perso'])->category === Category::Perso);
 
 exit($failures === 0 ? 0 : 1);

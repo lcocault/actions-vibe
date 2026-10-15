@@ -106,6 +106,43 @@ check('tâche supprimée -> 404', $s === 404);
 [$s] = call('DELETE', "/api/tasks/$a");
 check('DELETE inconnu -> 404', $s === 404);
 
+// Projets : catégorie portée par le projet
+$pname = 'Projet test ' . bin2hex(random_bytes(3));
+[$s, $b, $h] = call('POST', '/api/projects', ['name' => $pname, 'category' => 'Perso']);
+$pid = $b['data']['id'] ?? 0;
+check('POST projet (201, Location)', $s === 201 && ($h['location'] ?? '') === "/api/projects/$pid" && $b['data']['task_count'] === 0);
+[$s, $b] = call('POST', '/api/projects', ['name' => $pname, 'category' => 'Pro']);
+check('nom de projet en double -> 422', $s === 422 && isset($b['error']['details']['name']));
+[$s, $b] = call('POST', '/api/projects', ['name' => '', 'category' => 'X']);
+check('projet invalide -> 422', $s === 422 && isset($b['error']['details']['name'], $b['error']['details']['category']));
+[$s, $b] = call('GET', '/api/projects?category=Perso');
+check('GET projets filtrés', $s === 200 && in_array($pname, array_column($b['data'], 'name'), true));
+
+[$s, $b] = call('POST', '/api/tasks', ['title' => 'Tâche projet', 'project' => $pname]);
+$pt = $b['data']['id'] ?? 0;
+check('tâche : catégorie déduite du projet', $s === 201 && $b['data']['category'] === 'Perso' && $b['data']['project'] === $pname);
+[$s, $b] = call('POST', '/api/tasks', ['title' => 'Conflit', 'category' => 'Pro', 'project' => $pname]);
+check('catégorie contredisant le projet -> 422', $s === 422 && isset($b['error']['details']['category']));
+[$s, $b] = call('POST', '/api/tasks', ['title' => 'Inconnu', 'category' => 'Pro', 'project' => 'Projet inexistant']);
+check('projet inconnu -> 422', $s === 422 && isset($b['error']['details']['project']));
+
+[$s, $b] = call('PATCH', "/api/projects/$pid", ['category' => 'Pro']);
+check('changer la catégorie du projet', $s === 200 && $b['data']['category'] === 'Pro' && $b['data']['task_count'] === 1);
+[$s, $b] = call('GET', "/api/tasks/$pt");
+check('catégorie propagée aux tâches', $b['data']['category'] === 'Pro');
+$renamed = $pname . ' bis';
+[$s, $b] = call('PATCH', "/api/projects/$pid", ['name' => $renamed]);
+[$s, $b] = call('GET', "/api/tasks/$pt");
+check('renommage propagé aux tâches', $b['data']['project'] === $renamed);
+
+[$s, $b] = call('DELETE', "/api/projects/$pid");
+check('suppression d\'un projet utilisé -> 409', $s === 409 && $b['error']['code'] === 'project_in_use');
+call('DELETE', "/api/tasks/$pt");
+[$s] = call('DELETE', "/api/projects/$pid");
+check('suppression d\'un projet libre -> 204', $s === 204);
+[$s] = call('GET', "/api/projects/$pid");
+check('projet supprimé -> 404', $s === 404);
+
 call('DELETE', "/api/tasks/$t");
 call('DELETE', "/api/tasks/$next");
 exit($failures > 0 ? 1 : 0);
