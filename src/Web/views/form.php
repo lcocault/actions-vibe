@@ -34,6 +34,15 @@ $action = $task === null ? '/tasks' : '/tasks/' . (int) $task['id'];
         <?php if (isset($errors['category'])): ?><span class="error"><?= View::h($errors['category']) ?></span><?php endif; ?>
     </label>
 
+    <label>Importance
+        <select name="importance">
+            <?php foreach (['Mineure', 'Majeure', 'Critique'] as $i): ?>
+                <option value="<?= $i ?>"<?= ($v('importance') ?: 'Mineure') === $i ? ' selected' : '' ?>><?= $i ?></option>
+            <?php endforeach; ?>
+        </select>
+        <?php if (isset($errors['importance'])): ?><span class="error"><?= View::h($errors['importance']) ?></span><?php endif; ?>
+    </label>
+
     <label>Date butée
         <input type="date" name="due_date" value="<?= View::h($v('due_date')) ?>">
         <?php if (isset($errors['due_date'])): ?><span class="error"><?= View::h($errors['due_date']) ?></span><?php endif; ?>

@@ -41,6 +41,15 @@ function call(string $method, string $path, mixed $body = null, ?string $raw = n
 [$s, $b, $h] = call('POST', '/api/tasks', ['title' => 'Prérequis', 'category' => 'Pro']);
 $a = $b['data']['id'] ?? 0;
 check('POST crée (201, Location)', $s === 201 && ($h['location'] ?? '') === "/api/tasks/$a" && $b['data']['status'] === 'a_faire');
+check('importance par défaut : Mineure', ($b['data']['importance'] ?? '') === 'Mineure');
+[$s, $b] = call('POST', '/api/tasks', ['title' => 'Urgente', 'category' => 'Pro', 'importance' => 'Critique']);
+check('POST avec importance Critique', $s === 201 && $b['data']['importance'] === 'Critique');
+$imp = $b['data']['id'] ?? 0;
+[$s, $b] = call('PATCH', "/api/tasks/$imp", ['importance' => 'Majeure']);
+check('PATCH importance', $s === 200 && $b['data']['importance'] === 'Majeure');
+[$s, $b] = call('PATCH', "/api/tasks/$imp", ['importance' => 'Haute']);
+check('importance invalide -> 422', $s === 422 && isset($b['error']['details']['importance']));
+call('DELETE', "/api/tasks/$imp");
 
 [$s, $b] = call('POST', '/api/tasks', ['title' => 'Principale', 'category' => 'Perso', 'due_date' => '2026-01-31', 'recurrence' => 'mensuelle', 'requirements' => [$a]]);
 $t = $b['data']['id'] ?? 0;

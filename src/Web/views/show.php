@@ -3,6 +3,7 @@
 <h1><?= View::h($task['title']) ?> <?php require __DIR__ . '/_badge.php'; ?></h1>
 <dl class="details">
     <dt>Catégorie</dt><dd><span class="cat cat-<?= View::h(strtolower($task['category'])) ?>"><?= View::h($task['category']) ?></span></dd>
+    <dt>Importance</dt><dd><span class="imp imp-<?= View::h(strtolower($task['importance'])) ?>"><?= View::h($task['importance']) ?></span></dd>
     <dt>Date butée</dt><dd class="<?= View::isOverdue($task) ? 'overdue' : '' ?>"><?= $task['due_date'] ? View::h(View::date($task['due_date'])) : '—' ?></dd>
     <dt>Périodicité</dt><dd><?= $task['recurrence'] ? View::h(View::RECURRENCE_LABELS[$task['recurrence']]) : '—' ?></dd>
     <dt>Durée estimée</dt><dd><?= $task['duration_minutes'] ? View::h(View::duration($task['duration_minutes'])) : '—' ?></dd>

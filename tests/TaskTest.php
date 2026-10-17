@@ -7,6 +7,7 @@ declare(strict_types=1);
 require __DIR__ . '/../src/autoload.php';
 
 use App\Task\Category;
+use App\Task\Importance;
 use App\Task\InvalidTransitionException;
 use App\Task\Project;
 use App\Task\Recurrence;
@@ -86,6 +87,11 @@ check('conclusions non texte refusées', throws(fn() => Task::create($valid + ['
 check('conclusions conservées par complete()', $pc->start()->complete()->conclusions === 'Livré');
 
 // Hydratation
+check('importance par défaut : Mineure', Task::create($valid)->importance === Importance::Mineure);
+check('importance Critique acceptée', Task::create($valid + ['importance' => 'Critique'])->importance === Importance::Critique);
+check('importance invalide refusée', throws(fn() => Task::create($valid + ['importance' => 'Haute']), ValidationException::class));
+check('importance conservée par with()', Task::create($valid + ['importance' => 'Majeure'])->with(['title' => 'Z'])->importance === Importance::Majeure);
+
 $row = Task::fromRow(['id' => '7', 'title' => 'A', 'category' => 'Perso', 'due_date' => '2026-05-01', 'recurrence' => null,
     'duration_minutes' => null, 'description' => null, 'project' => 'Alpha', 'conclusions' => null, 'status' => 'en_cours', 'completed_at' => null]);
 check('fromRow', $row->id === 7 && $row->project === 'Alpha' && $row->status === Status::EnCours && $row->dueDate?->format('Y-m-d') === '2026-05-01');

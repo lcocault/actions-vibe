@@ -56,3 +56,7 @@
 - La catégorie est portée par le projet : une tâche rattachée à un projet en hérite (déduite si absente, 422 si elle le contredit) ; le projet doit exister (422 sinon). Changer la catégorie d'un projet la propage à ses tâches.
 - `Task\Project`, `ProjectRepository`, `Api\ProjectApi` (`/api/projects`, 409 `project_in_use`), pages portail `/projects` (liste, création, édition, suppression) et sélecteur de projet dans le formulaire de tâche, outils MCP `*_project`. Constructeurs de `TaskApi`, `McpServer` et `Portal` étendus.
 - Tests ajoutés (`TaskTest`, `ApiTest`, `McpTest`) mais non exécutés : ni PHP ni Docker disponibles dans cet environnement.
+
+## 2026-10-17
+
+- Attribut « Importance » des tâches (`Mineure` par défaut, `Majeure`, `Critique`) : enum `Importance`, migration `migrations/005_task_importance.sql`, validation, API, MCP, portail (formulaire, liste, détail) et tests.

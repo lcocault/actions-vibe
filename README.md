@@ -32,7 +32,7 @@ http://localhost:8080/ : liste filtrable des tâches, création, édition, suppr
 ## API REST
 
 `/api/tasks` (JSON) : `GET` liste (filtres `?category=Pro|Perso`, `?status=a_faire|en_cours|terminee`), `POST` création, `GET|PUT|PATCH|DELETE /api/tasks/{id}`.
-Champs : `title`, `category`, `due_date` (AAAA-MM-JJ), `recurrence`, `duration_minutes`, `description`, `project`, `conclusions`, `status`, `requirements` (ids des prérequis). Test : `docker compose exec app php tests/ApiTest.php http://localhost`.
+Champs : `title`, `category`, `importance` (`Mineure` par défaut, `Majeure` ou `Critique` ; migration `migrations/005_task_importance.sql` à appliquer à la main sur une base existante), `due_date` (AAAA-MM-JJ), `recurrence`, `duration_minutes`, `description`, `project`, `conclusions`, `status`, `requirements` (ids des prérequis). Test : `docker compose exec app php tests/ApiTest.php http://localhost`.
 
 ## Projets
 

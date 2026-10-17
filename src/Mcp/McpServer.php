@@ -107,7 +107,7 @@ final class McpServer
             'protocolVersion' => $version,
             'capabilities' => ['tools' => ['listChanged' => false]],
             'serverInfo' => ['name' => 'actions-vibe', 'version' => '1.0.0'],
-            'instructions' => 'Gestion de tâches avec prérequis, statuts et périodicité, rattachées à des projets Pro/Perso (la catégorie d'une tâche est celle de son projet).',
+            'instructions' => 'Gestion de tâches avec prérequis, statuts et périodicité, rattachées à des projets Pro/Perso (la catégorie d\'une tâche est celle de son projet).',
         ];
     }
 
@@ -189,6 +189,7 @@ final class McpServer
         $fields = [
             'title' => ['type' => 'string', 'description' => 'Titre (obligatoire à la création).'],
             'category' => $category,
+            'importance' => ['type' => 'string', 'enum' => ['Mineure', 'Majeure', 'Critique'], 'description' => 'Importance (défaut : Mineure).'],
             'due_date' => ['type' => ['string', 'null'], 'description' => 'Date butée au format AAAA-MM-JJ.'],
             'recurrence' => [
                 'type' => ['string', 'null'],

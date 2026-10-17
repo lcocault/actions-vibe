@@ -16,6 +16,7 @@ final class Task
         public readonly ?int $id,
         public readonly string $title,
         public readonly Category $category,
+        public readonly Importance $importance,
         public readonly ?DateTimeImmutable $dueDate,
         public readonly ?Recurrence $recurrence,
         public readonly ?int $durationMinutes,
@@ -51,6 +52,7 @@ final class Task
             (int) $row['id'],
             (string) $row['title'],
             Category::from((string) $row['category']),
+            Importance::from((string) ($row['importance'] ?? Importance::Mineure->value)),
             isset($row['due_date']) ? new DateTimeImmutable((string) $row['due_date']) : null,
             isset($row['recurrence']) ? Recurrence::from((string) $row['recurrence']) : null,
             isset($row['duration_minutes']) ? (int) $row['duration_minutes'] : null,
@@ -103,6 +105,7 @@ final class Task
             null,
             $this->title,
             $this->category,
+            $this->importance,
             $this->recurrence->next($this->dueDate),
             $this->recurrence,
             $this->durationMinutes,
@@ -121,6 +124,7 @@ final class Task
             'id' => $this->id,
             'title' => $this->title,
             'category' => $this->category->value,
+            'importance' => $this->importance->value,
             'due_date' => $this->dueDate?->format('Y-m-d'),
             'recurrence' => $this->recurrence?->value,
             'duration_minutes' => $this->durationMinutes,
@@ -141,6 +145,7 @@ final class Task
             $this->id,
             $this->title,
             $this->category,
+            $this->importance,
             $this->dueDate,
             $this->recurrence,
             $this->durationMinutes,
@@ -154,7 +159,7 @@ final class Task
 
     /**
      * @param array<string,mixed> $data
-     * @return array{title:string,category:Category,dueDate:?DateTimeImmutable,recurrence:?Recurrence,durationMinutes:?int,description:?string,project:?string,conclusions:?string}
+     * @return array{title:string,category:Category,importance:Importance,dueDate:?DateTimeImmutable,recurrence:?Recurrence,durationMinutes:?int,description:?string,project:?string,conclusions:?string}
      * @throws ValidationException
      */
     private static function validate(array $data): array
@@ -172,6 +177,16 @@ final class Task
         $category = is_string($data['category'] ?? null) ? Category::tryFrom($data['category']) : null;
         if ($category === null) {
             $errors['category'] = 'La catégorie doit être « Pro » ou « Perso ».';
+        }
+
+        $importance = Importance::Mineure;
+        $rawImportance = $data['importance'] ?? null;
+        if ($rawImportance !== null && $rawImportance !== '') {
+            $importance = is_string($rawImportance) ? Importance::tryFrom($rawImportance) : null;
+            if ($importance === null) {
+                $importance = Importance::Mineure;
+                $errors['importance'] = 'L\'importance doit être « Mineure », « Majeure » ou « Critique ».';
+            }
         }
 
         $dueDate = null;
@@ -243,6 +258,7 @@ final class Task
         return [
             'title' => $title,
             'category' => $category,
+            'importance' => $importance,
             'dueDate' => $dueDate,
             'recurrence' => $recurrence,
             'durationMinutes' => $duration,

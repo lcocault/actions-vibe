@@ -27,7 +27,7 @@
 <div class="table-wrap">
 <table>
     <thead>
-        <tr><th>Titre</th><th>Projet</th><th>Catégorie</th><th>Date butée</th><th>Durée</th><th>Statut</th><th>Prérequis</th><th>Actions</th></tr>
+        <tr><th>Titre</th><th>Projet</th><th>Catégorie</th><th>Importance</th><th>Date butée</th><th>Durée</th><th>Statut</th><th>Prérequis</th><th>Actions</th></tr>
     </thead>
     <tbody>
     <?php foreach ($tasks as $task): ?>
@@ -35,6 +35,7 @@
             <td><a href="/tasks/<?= (int) $task['id'] ?>"><?= View::h($task['title']) ?></a></td>
             <td><?= View::h($task['project'] ?? '') ?></td>
             <td><span class="cat cat-<?= View::h(strtolower($task['category'])) ?>"><?= View::h($task['category']) ?></span></td>
+            <td><span class="imp imp-<?= View::h(strtolower($task['importance'])) ?>"><?= View::h($task['importance']) ?></span></td>
             <td class="<?= View::isOverdue($task) ? 'overdue' : '' ?>">
                 <?= View::h(View::date($task['due_date'])) ?>
                 <?php if ($task['recurrence']): ?><small title="Périodicité">↻ <?= View::h(View::RECURRENCE_LABELS[$task['recurrence']]) ?></small><?php endif; ?>
