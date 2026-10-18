@@ -38,6 +38,8 @@ Champs : `title`, `category`, `importance` (`Mineure` par défaut, `Majeure` ou 
 
 Liste configurable : portail `/projects`, API `/api/projects` (`GET` avec filtre `?category=`, `POST`, `GET|PUT|PATCH|DELETE /api/projects/{id}`), champs `name` (unique) et `category` (`Pro`/`Perso`). Une tâche se rattache à un projet existant par son nom (`project`) et hérite de sa catégorie (refusée si elle la contredit). Changer la catégorie d'un projet l'applique à ses tâches, le renommer met à jour ses tâches, le supprimer est refusé (409) tant qu'il a des tâches. Migration `migrations/004_project.sql` (à appliquer à la main sur une base existante ; reprend les projets texte libre existants).
 
+Vue projet `/projects/{id}` (portail) : synthèse des actions par statut (dont bloquées) et matrice d'Eisenhower 3×3 (importance × échéance : moins d'une semaine, moins d'un mois, au-delà ; retards en première colonne, sans date en dernière ; tâches terminées exclues). Test : `php tests/EisenhowerTest.php`.
+
 ## MCP
 
 Endpoint `POST /mcp` (MCP, transport HTTP, JSON-RPC 2.0). Outils : `create_task`, `list_tasks`, `get_task`, `update_task`, `delete_task`, `create_project`, `list_projects`, `get_project`, `update_project`, `delete_project` (mêmes champs que l'API REST). Test : `docker compose exec app php tests/McpTest.php http://localhost`.

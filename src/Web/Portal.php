@@ -6,6 +6,7 @@ namespace App\Web;
 
 use App\Api\ProjectApi;
 use App\Api\TaskApi;
+use App\Task\Eisenhower;
 
 /**
  * Portail web : pages HTML rendues côté serveur, s'appuyant sur `TaskApi` en mémoire
@@ -60,6 +61,7 @@ final class Portal
         if (preg_match('#^/projects/(\d+)(?:/(edit|delete))?$#', $path, $m)) {
             $id = (int) $m[1];
             return match ([$method, $m[2] ?? '']) {
+                ['GET', ''] => $this->showProject($id),
                 ['GET', 'edit'] => $this->editProject($id),
                 ['POST', ''] => $this->saveProject($id, $post),
                 ['POST', 'delete'] => $this->deleteProject($id),
@@ -209,6 +211,31 @@ final class Portal
     {
         $r = $this->projectApi->handle('GET', '/api/projects');
         return $this->page(200, 'Projets', 'projects', ['projects' => $r['body']['data'] ?? []]);
+    }
+
+    private function showProject(int $id): array
+    {
+        $project = $this->loadProject($id);
+        if ($project === null) {
+            return $this->missingProject();
+        }
+        $tasks = array_values(array_filter(
+            $this->api->handle('GET', '/api/tasks')['body']['data'] ?? [],
+            static fn(array $t): bool => $t['project'] === $project['name'],
+        ));
+        $summary = array_fill_keys(array_keys(View::STATUS_LABELS), 0);
+        $blocked = 0;
+        foreach ($tasks as $t) {
+            $summary[$t['status']]++;
+            $blocked += View::isBlocked($t) ? 1 : 0;
+        }
+        return $this->page(200, $project['name'], 'project_show', [
+            'project' => $project,
+            'tasks' => $tasks,
+            'summary' => $summary,
+            'blocked' => $blocked,
+            'matrix' => Eisenhower::matrix($tasks, new \DateTimeImmutable('today')),
+        ]);
     }
 
     private function editProject(int $id): array

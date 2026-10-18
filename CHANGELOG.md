@@ -60,3 +60,7 @@
 ## 2026-10-17
 
 - Attribut « Importance » des tâches (`Mineure` par défaut, `Majeure`, `Critique`) : enum `Importance`, migration `migrations/005_task_importance.sql`, validation, API, MCP, portail (formulaire, liste, détail) et tests.
+
+## 2026-10-18
+
+- Vue projet `/projects/{id}` : synthèse des actions par statut et matrice d'Eisenhower 9 cellules (`src/Task/Eisenhower.php`, `tests/EisenhowerTest.php`) ; les noms de la liste des projets y renvoient.

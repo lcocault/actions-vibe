@@ -11,7 +11,7 @@
     <tbody>
     <?php foreach ($projects as $p): ?>
         <tr>
-            <td><?= View::h($p['name']) ?></td>
+            <td><a href="/projects/<?= (int) $p['id'] ?>"><?= View::h($p['name']) ?></a></td>
             <td><span class="cat cat-<?= View::h(strtolower($p['category'])) ?>"><?= View::h($p['category']) ?></span></td>
             <td><?= (int) $p['task_count'] ?></td>
             <td class="actions">
