@@ -33,11 +33,12 @@ use App\Web\View;
             <th><span class="imp imp-<?= View::h(strtolower($importance)) ?>"><?= View::h($importance) ?></span></th>
             <?php foreach ($cells as $urgency => $cell): ?>
                 <td class="cell cell-<?= View::h($importance === 'Critique' && $urgency === 'week' ? 'hot' : 'std') ?>">
-                    <?php foreach ($cell as $t): ?>
-                        <a class="req" href="/tasks/<?= (int) $t['id'] ?>"><?= View::h($t['title']) ?>
-                            <?php if ($t['due_date']): ?><small class="<?= View::isOverdue($t) ? 'overdue' : '' ?>"><?= View::h(View::date($t['due_date'])) ?></small><?php endif; ?>
-                        </a>
-                    <?php endforeach; ?>
+                    <?php if ($cell !== []): ?>
+                        <a class="count" href="/projects/<?= (int) $project['id'] ?>?importance=<?= urlencode($importance) ?>&amp;urgency=<?= urlencode($urgency) ?>#selection"
+                           title="Voir les actions"><?= count($cell) ?></a>
+                    <?php else: ?>
+                        <span class="muted">0</span>
+                    <?php endif; ?>
                 </td>
             <?php endforeach; ?>
         </tr>
@@ -45,4 +46,26 @@ use App\Web\View;
     </tbody>
 </table>
 </div>
+
+<?php if ($selection !== null): ?>
+<h2 id="selection">
+    <span class="imp imp-<?= View::h(strtolower($selection['importance'])) ?>"><?= View::h($selection['importance']) ?></span>
+    · <?= View::h(Eisenhower::URGENCIES[$selection['urgency']]) ?>
+    <a class="btn-small" href="/projects/<?= (int) $project['id'] ?>">Effacer le filtre</a>
+</h2>
+<div class="table-wrap">
+<table class="task-list">
+    <thead><tr><th>Titre</th><th class="opt">Date butée</th><th class="opt">Statut</th></tr></thead>
+    <tbody>
+    <?php foreach ($selection['tasks'] as $task): ?>
+        <tr>
+            <td><a href="/tasks/<?= (int) $task['id'] ?>"><?= View::h($task['title']) ?></a></td>
+            <td class="opt <?= View::isOverdue($task) ? 'overdue' : '' ?>"><?= View::h(View::date($task['due_date'])) ?></td>
+            <td class="opt"><?php require __DIR__ . '/_badge.php'; ?></td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+</div>
+<?php endif; ?>
 <?php endif; ?>

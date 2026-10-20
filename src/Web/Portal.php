@@ -61,7 +61,7 @@ final class Portal
         if (preg_match('#^/projects/(\d+)(?:/(edit|delete))?$#', $path, $m)) {
             $id = (int) $m[1];
             return match ([$method, $m[2] ?? '']) {
-                ['GET', ''] => $this->showProject($id),
+                ['GET', ''] => $this->showProject($id, $query),
                 ['GET', 'edit'] => $this->editProject($id),
                 ['POST', ''] => $this->saveProject($id, $post),
                 ['POST', 'delete'] => $this->deleteProject($id),
@@ -213,7 +213,8 @@ final class Portal
         return $this->page(200, 'Projets', 'projects', ['projects' => $r['body']['data'] ?? []]);
     }
 
-    private function showProject(int $id): array
+    /** @param array<string,mixed> $query */
+    private function showProject(int $id, array $query = []): array
     {
         $project = $this->loadProject($id);
         if ($project === null) {
@@ -229,12 +230,19 @@ final class Portal
             $summary[$t['status']]++;
             $blocked += View::isBlocked($t) ? 1 : 0;
         }
+        $matrix = Eisenhower::matrix($tasks, new \DateTimeImmutable('today'));
+        $importance = is_string($query['importance'] ?? null) ? $query['importance'] : '';
+        $urgency = is_string($query['urgency'] ?? null) ? $query['urgency'] : '';
+        $selection = isset($matrix[$importance][$urgency])
+            ? ['importance' => $importance, 'urgency' => $urgency, 'tasks' => $matrix[$importance][$urgency]]
+            : null;
         return $this->page(200, $project['name'], 'project_show', [
             'project' => $project,
             'tasks' => $tasks,
             'summary' => $summary,
             'blocked' => $blocked,
-            'matrix' => Eisenhower::matrix($tasks, new \DateTimeImmutable('today')),
+            'matrix' => $matrix,
+            'selection' => $selection,
         ]);
     }
 

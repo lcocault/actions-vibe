@@ -57,3 +57,15 @@ h2 { font-size: 1.15rem; margin: 1.5rem 0 .5rem; }
 .stat span { font-size: .85rem; color: var(--muted); }
 .matrix td.cell { width: 30%; min-width: 9rem; }
 .matrix .cell-hot { background: color-mix(in srgb, var(--danger) 10%, var(--card)); }
+.matrix .count { font-size: 1.4rem; font-weight: 700; text-decoration: none; padding: .1rem .6rem; border-radius: 6px; border: 1px solid var(--line); }
+.matrix td.cell { text-align: center; }
+@media (max-width: 700px) {
+    main { padding: .75rem; }
+    .top { flex-direction: column; align-items: stretch; gap: .5rem; }
+    .top nav { justify-content: space-between; }
+    .filters label, .filters select, .filters button { flex: 1 1 40%; }
+    .task-list .opt { display: none; }
+    .task-list td { padding: .8rem; font-size: 1.05rem; }
+    .matrix td.cell { min-width: 0; padding: .5rem; }
+    .matrix th { font-size: .7rem; padding: .4rem; }
+}
