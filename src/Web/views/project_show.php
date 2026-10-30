@@ -21,7 +21,7 @@ use App\Web\View;
 </div>
 
 <h2>Matrice d'Eisenhower</h2>
-<p class="muted">Actions non terminées, selon l'importance et l'échéance (retards inclus dans « moins d'une semaine », sans date butée dans « au-delà »).</p>
+<p class="muted">Actions non terminées, selon l'importance et l'échéance (les retards sont affichés séparément, sans date butée dans « au-delà »).</p>
 <div class="table-wrap">
 <table class="matrix">
     <thead>
@@ -32,7 +32,7 @@ use App\Web\View;
         <tr>
             <th><span class="imp imp-<?= View::h(strtolower($importance)) ?>"><?= View::h($importance) ?></span></th>
             <?php foreach ($cells as $urgency => $cell): ?>
-                <td class="cell cell-<?= View::h($importance === 'Critique' && $urgency === 'week' ? 'hot' : 'std') ?>">
+                <td class="cell cell-<?= View::h($importance === 'Critique' && in_array($urgency, ['late', 'week'], true) ? 'hot' : 'std') ?>">
                     <?php if ($cell !== []): ?>
                         <a class="count" href="/projects/<?= (int) $project['id'] ?>?importance=<?= urlencode($importance) ?>&amp;urgency=<?= urlencode($urgency) ?>#selection"
                            title="Voir les actions"><?= count($cell) ?></a>

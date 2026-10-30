@@ -7,14 +7,14 @@ namespace App\Task;
 use DateTimeImmutable;
 
 /**
- * Matrice d'Eisenhower à 9 cellules : importance (Critique, Majeure, Mineure) × urgence
- * (moins d'une semaine, moins d'un mois, au-delà). Les tâches en retard comptent comme
- * « moins d'une semaine » ; sans date butée, elles sont rangées dans « au-delà ».
+ * Matrice d'Eisenhower à 12 cellules : importance (Critique, Majeure, Mineure) × urgence
+ * (en retard, moins d'une semaine, moins d'un mois, au-delà). Sans date butée, les tâches
+ * sont rangées dans « au-delà ».
  */
 final class Eisenhower
 {
     public const IMPORTANCES = ['Critique', 'Majeure', 'Mineure'];
-    public const URGENCIES = ['week' => 'Moins d\'une semaine', 'month' => 'Moins d\'un mois', 'later' => 'Au-delà'];
+    public const URGENCIES = ['late' => 'En retard', 'week' => 'Moins d\'une semaine', 'month' => 'Moins d\'un mois', 'later' => 'Au-delà'];
 
     /** @param array{due_date:?string} $task */
     public static function urgency(array $task, DateTimeImmutable $today): string
@@ -23,6 +23,9 @@ final class Eisenhower
             return 'later';
         }
         $days = (int) $today->setTime(0, 0)->diff(new DateTimeImmutable($task['due_date']))->format('%r%a');
+        if ($days < 0) {
+            return 'late';
+        }
         return $days < 7 ? 'week' : ($days < 30 ? 'month' : 'later');
     }
 

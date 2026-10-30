@@ -55,7 +55,7 @@ h2 { font-size: 1.15rem; margin: 1.5rem 0 .5rem; }
 .stat { display: flex; flex-direction: column; align-items: center; min-width: 6rem; padding: .6rem 1rem; background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
 .stat strong { font-size: 1.5rem; }
 .stat span { font-size: .85rem; color: var(--muted); }
-.matrix td.cell { width: 30%; min-width: 9rem; }
+.matrix td.cell { width: 25%; min-width: 9rem; }
 .matrix .cell-hot { background: color-mix(in srgb, var(--danger) 10%, var(--card)); }
 .matrix .count { font-size: 1.4rem; font-weight: 700; text-decoration: none; padding: .1rem .6rem; border-radius: 6px; border: 1px solid var(--line); }
 .matrix td.cell { text-align: center; }
