@@ -19,7 +19,7 @@ function check(string $name, bool $ok): void
 $today = new DateTimeImmutable('2026-10-18 15:30');
 $t = static fn(?string $due, string $imp = 'Majeure', string $st = 'a_faire'): array => ['due_date' => $due, 'importance' => $imp, 'status' => $st];
 
-check('retard => semaine', Eisenhower::urgency($t('2026-10-01'), $today) === 'week');
+check('retard => colonne retard', Eisenhower::urgency($t('2026-10-01'), $today) === 'late');
 check('aujourd\'hui => semaine', Eisenhower::urgency($t('2026-10-18'), $today) === 'week');
 check('+6 jours => semaine', Eisenhower::urgency($t('2026-10-24'), $today) === 'week');
 check('+7 jours => mois', Eisenhower::urgency($t('2026-10-25'), $today) === 'month');
@@ -27,10 +27,11 @@ check('+29 jours => mois', Eisenhower::urgency($t('2026-11-16'), $today) === 'mo
 check('+30 jours => au-delà', Eisenhower::urgency($t('2026-11-17'), $today) === 'later');
 check('sans date => au-delà', Eisenhower::urgency($t(null), $today) === 'later');
 
-$m = Eisenhower::matrix([$t('2026-10-20', 'Critique'), $t(null, 'Mineure'), $t('2026-10-20', 'Critique', 'terminee')], $today);
-check('9 cellules', count($m) === 3 && count($m['Critique']) === 3);
+$m = Eisenhower::matrix([$t('2026-10-01', 'Critique'), $t('2026-10-20', 'Critique'), $t(null, 'Mineure'), $t('2026-10-01', 'Majeure', 'terminee')], $today);
+check('12 cellules', count($m) === 3 && count($m['Critique']) === 4);
+check('retard placé séparément', count($m['Critique']['late']) === 1);
 check('critique/semaine', count($m['Critique']['week']) === 1);
 check('mineure/au-delà', count($m['Mineure']['later']) === 1);
-check('terminées exclues', count($m['Critique']['week']) === 1 && $m['Majeure']['week'] === []);
+check('terminées exclues', $m['Majeure']['late'] === []);
 
 exit($failures === 0 ? 0 : 1);
