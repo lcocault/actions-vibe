@@ -11,7 +11,8 @@
     </label>
     <label>Statut
         <select name="status">
-            <option value="">Tous</option>
+            <option value="">Non terminées</option>
+            <option value="all"<?= ($filters['status'] ?? '') === 'all' ? ' selected' : '' ?>>Toutes</option>
             <?php foreach (View::STATUS_LABELS as $value => $label): ?>
                 <option value="<?= $value ?>"<?= ($filters['status'] ?? '') === $value ? ' selected' : '' ?>><?= View::h($label) ?></option>
             <?php endforeach; ?>

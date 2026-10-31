@@ -91,12 +91,25 @@ final class Portal
                 $filters[$key] = $query[$key];
             }
         }
-        $r = $this->api->handle('GET', '/api/tasks', $filters);
+        $showAll = ($filters['status'] ?? null) === 'all';
+        $apiFilters = $filters;
+        if ($showAll) {
+            unset($apiFilters['status']);
+        }
+        $r = $this->api->handle('GET', '/api/tasks', $apiFilters);
         if ($r['status'] !== 200) {
             $filters = [];
-            $r = $this->api->handle('GET', '/api/tasks');
+            $apiFilters = [];
+            $showAll = false;
+            $r = $this->api->handle('GET', '/api/tasks', $apiFilters);
         }
         $tasks = $r['body']['data'] ?? [];
+        if (!$showAll && !isset($apiFilters['status'])) {
+            $tasks = array_values(array_filter(
+                $tasks,
+                static fn(array $task): bool => $task['status'] !== 'terminee',
+            ));
+        }
         return $this->page(200, 'Actions', 'list', ['tasks' => $tasks, 'filters' => $filters]);
     }
 
