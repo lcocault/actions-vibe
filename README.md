@@ -27,7 +27,7 @@ docker compose up --build
 
 ## Portail web
 
-http://localhost:8080/ : liste filtrable des tâches, création, édition, suppression, changement de statut et prérequis. Code dans `src/Web/`, styles dans `public/assets/portal.css`.
+http://localhost:8080/ : liste filtrable des tâches, création, édition, suppression, changement de statut et prérequis. `/matrix` affiche la matrice d'Eisenhower globale de toutes les actions non terminées, tous projets confondus. Code dans `src/Web/`, styles dans `public/assets/portal.css`.
 
 ## API REST
 
