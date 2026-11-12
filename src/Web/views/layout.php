@@ -13,6 +13,7 @@
     <nav>
         <a href="/">Actions</a>
         <a href="/?status=en_cours">En cours</a>
+        <a href="/matrix">Matrice globale</a>
         <a href="/projects">Projets</a>
         <a class="btn" href="/tasks/new">+ Nouvelle tâche</a>
     </nav>

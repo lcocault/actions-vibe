@@ -42,6 +42,9 @@ final class Portal
         if ($path === '/') {
             return $method === 'GET' ? $this->index($query) : $this->notAllowed();
         }
+        if ($path === '/matrix') {
+            return $method === 'GET' ? $this->globalMatrix($query) : $this->notAllowed();
+        }
         if ($path === '/tasks/new') {
             return $method === 'GET' ? $this->form(null, [], []) : $this->notAllowed();
         }
@@ -111,6 +114,22 @@ final class Portal
             ));
         }
         return $this->page(200, 'Actions', 'list', ['tasks' => $tasks, 'filters' => $filters]);
+    }
+
+    /** @param array<string,mixed> $query */
+    private function globalMatrix(array $query): array
+    {
+        $tasks = $this->api->handle('GET', '/api/tasks')['body']['data'] ?? [];
+        $matrix = Eisenhower::matrix($tasks, new \DateTimeImmutable('today'));
+        $importance = is_string($query['importance'] ?? null) ? $query['importance'] : '';
+        $urgency = is_string($query['urgency'] ?? null) ? $query['urgency'] : '';
+        $selection = isset($matrix[$importance][$urgency])
+            ? ['importance' => $importance, 'urgency' => $urgency, 'tasks' => $matrix[$importance][$urgency]]
+            : null;
+        return $this->page(200, 'Matrice globale', 'matrix', [
+            'matrix' => $matrix,
+            'selection' => $selection,
+        ]);
     }
 
     private function show(int $id): array
