@@ -26,6 +26,8 @@ $pdo->exec('CREATE TABLE task (
     duration_minutes INTEGER, description TEXT, project TEXT, conclusions TEXT, status TEXT, completed_at TEXT
 )');
 $pdo->exec('CREATE TABLE task_dependency (task_id INTEGER, required_task_id INTEGER)');
+$pdo->exec('CREATE TABLE project (id INTEGER PRIMARY KEY, name TEXT, category TEXT, updated_at TEXT)');
+$pdo->exec("INSERT INTO project (id, name, category) VALUES (1, 'Alpha', 'Pro')");
 $insert = $pdo->prepare(
     'INSERT INTO task (id, title, category, importance, status, completed_at) VALUES (?, ?, ?, ?, ?, ?)',
 );
@@ -33,11 +35,11 @@ $insert->execute([1, 'À faire', 'Pro', 'Mineure', 'a_faire', null]);
 $insert->execute([2, 'En cours', 'Pro', 'Mineure', 'en_cours', null]);
 $insert->execute([3, 'Terminée', 'Pro', 'Mineure', 'terminee', '2026-10-30']);
 $globalTask = $pdo->prepare(
-    'INSERT INTO task (id, title, category, importance, project, status, completed_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO task (id, title, category, importance, project, status, completed_at, duration_minutes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
 );
-$globalTask->execute([4, 'Action Alpha', 'Pro', 'Critique', 'Alpha', 'a_faire', null]);
-$globalTask->execute([5, 'Action Beta', 'Perso', 'Critique', 'Beta', 'en_cours', null]);
-$globalTask->execute([6, 'Action terminée', 'Pro', 'Critique', 'Gamma', 'terminee', '2026-10-30']);
+$globalTask->execute([4, 'Action Alpha', 'Pro', 'Critique', 'Alpha', 'a_faire', null, 90]);
+$globalTask->execute([5, 'Action Beta', 'Perso', 'Critique', 'Beta', 'en_cours', null, 60]);
+$globalTask->execute([6, 'Action terminée', 'Pro', 'Critique', 'Gamma', 'terminee', '2026-10-30', 300]);
 
 $projects = new ProjectRepository($pdo);
 $api = new TaskApi(new TaskRepository($pdo), new DependencyRepository($pdo), $projects);
@@ -55,6 +57,9 @@ check('le filtre toutes affiche aussi les tâches terminées', str_contains($all
 
 $matrix = $portal->handle('GET', '/matrix')['body'];
 check('la matrice globale est accessible depuis le menu', str_contains($matrix, 'href="/matrix">Matrice globale</a>') && str_contains($matrix, "Matrice d'Eisenhower globale"));
+check('la matrice globale affiche la durée cumulée', str_contains($matrix, '2 h 30'));
+$projectMatrix = $portal->handle('GET', '/projects/1')['body'];
+check('la matrice du projet affiche sa durée cumulée', str_contains($projectMatrix, '1 h 30') && !str_contains($projectMatrix, '2 h 30'));
 $selection = $portal->handle('GET', '/matrix', ['importance' => 'Critique', 'urgency' => 'later'])['body'];
 check('la sélection globale agrège les projets et exclut les tâches terminées', str_contains($selection, 'Action Alpha') && str_contains($selection, 'Action Beta') && !str_contains($selection, 'Action terminée'));
 

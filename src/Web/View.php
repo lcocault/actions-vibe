@@ -30,6 +30,16 @@ final class View
         return $minutes < 60 ? "$minutes min" : intdiv($minutes, 60) . ' h' . ($minutes % 60 ? sprintf(' %02d', $minutes % 60) : '');
     }
 
+    /** @param list<array<string,mixed>> $tasks */
+    public static function totalDuration(array $tasks): string
+    {
+        $minutes = array_sum(array_map(
+            static fn(array $task): int => (int) ($task['duration_minutes'] ?? 0),
+            $tasks,
+        ));
+        return self::duration($minutes);
+    }
+
     public static function date(?string $iso): string
     {
         return $iso === null ? '' : (new DateTimeImmutable($iso))->format('d/m/Y');
