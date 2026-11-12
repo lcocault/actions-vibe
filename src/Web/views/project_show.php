@@ -36,6 +36,7 @@ use App\Web\View;
                     <?php if ($cell !== []): ?>
                         <a class="count" href="/projects/<?= (int) $project['id'] ?>?importance=<?= urlencode($importance) ?>&amp;urgency=<?= urlencode($urgency) ?>#selection"
                            title="Voir les actions"><?= count($cell) ?></a>
+                        <small><?= View::h(View::totalDuration($cell)) ?></small>
                     <?php else: ?>
                         <span class="muted">0</span>
                     <?php endif; ?>
